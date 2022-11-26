@@ -86,6 +86,19 @@ void testMax2() {
   auto [l, r] = ts.solvemaximum(-5, 100);
   cout << l << "," << r << ": ←1.90864ならokでmaxは," << f(l) << endl;
 }
+
+void arc054() {
+  ld p;
+  cin >> p;
+  auto f = [&](ld x) { return x + p / (pow(2, x / 1.5)); };
+  auto judge = [](ld l, ld r) {
+    if (l + pow(10, -8) < r) return true;
+    return false;
+  };
+  TernarySearchSolver<ld, ld, decltype(f), decltype(judge)> ts(f, judge);
+  auto [l, r] = ts.solveminimum(0, p);
+  cout << fixed << setprecision(10) << f(l);
+}
 int main() {
   testMin();
   testMax();
