@@ -66,7 +66,7 @@ struct Tree {
       }
     }
     for (ll _k = 0; _k + 1 < k; _k++) {
-      for (ll i; i < v; i++) {
+      for (ll i = 0; i < v; i++) {
         if (parent[_k][i] < 0) {
           parent[_k + 1][i] = -1;
         } else {
@@ -122,4 +122,3 @@ void testTree() {
 }
 
 int main() { testTree(); }
-
