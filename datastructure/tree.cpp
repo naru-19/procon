@@ -6,7 +6,6 @@ using namespace std;
 できること:無向木において、2点間の距離をO(NlogN)で求めることができる。
 また、任意の2点の最近共通祖先(lca)をO(NlogN)で求めることができる
 */
-
 struct _edge {
   ll next;
   ll cost;
@@ -17,10 +16,11 @@ struct Tree {
   参考にした実装:https://algo-logic.info/lca/
   */
   ll v; /*頂点数*/
-  vector<vector<ll> > parent;
-  vector<vector<_edge> > edges;
+  vector<vector<ll>> parent;
+  vector<vector<_edge>> edges;
   vector<ll> depth;
   ll root;
+  ll cost = 1;
   void init(ll n) {
     edges.resize(n);
     depth.resize(n);
@@ -29,7 +29,7 @@ struct Tree {
     v = n;
     init(n);
   }
-  void add_edge(ll u, ll v, ll cost) {
+  void add_edge(ll u, ll v) {
     _edge e;
     e.next = v;
     e.cost = cost;
@@ -97,6 +97,39 @@ struct Tree {
     ll _lca = lca(u, v);
     return depth[u] + depth[v] - 2 * depth[_lca];
   }
+  pair<ll, pair<ll, ll>> get_diameter() {
+    /*
+    木の直径を求めるプログラムでO(N)
+    戻り値は [直径,[端点1,端点2]]
+    */
+    vector<ll> seen(v);
+    deque<pair<ll, ll>> q;
+    //  端点1を見つける
+    ll edge_node1 = 0, max_depth = 0;
+    for (ll i = 0; i < v; i++) {
+      if (max_depth < depth[i]) {
+        max_depth = depth[i];
+        edge_node1 = i;
+      }
+    }
+    ll diameter = 0;
+    ll edge_node2 = edge_node1;
+    q.push_back({edge_node1, 0});
+    while (q.size()) {
+      auto [tmp, d] = q.front();
+      q.pop_front();
+      for (auto e : edges[tmp]) {
+        if (seen[e.next] == 1) continue;
+        seen[e.next] = 1;
+        if (diameter < d + 1) {
+          diameter = d + 1;
+          edge_node2 = e.next;
+        }
+        q.push_back({e.next, d + 1});
+      }
+    }
+    return {diameter, {edge_node1, edge_node2}};
+  }
 };
 
 void testTree() {
@@ -109,16 +142,18 @@ void testTree() {
       3
   */
   Tree tree(n);
-  tree.add_edge(0, 1, 1);
-  tree.add_edge(2, 1, 1);
-  tree.add_edge(0, 4, 1);
-  tree.add_edge(1, 3, 1);
+  tree.add_edge(0, 1);
+  tree.add_edge(2, 1);
+  tree.add_edge(0, 4);
+  tree.add_edge(1, 3);
   // root=0
   tree.build(0);
   cout << tree.lca(0, 3) << ": ans=0" << endl;
   cout << tree.lca(2, 4) << ": ans=0" << endl;
   cout << tree.lca(2, 3) << ": ans=1" << endl;
   cout << tree.dist(2, 4) << ": ans=3" << endl;
+  ll diameter = tree.get_diameter().first;
+  cout << "tree diameter is " << diameter << "(ans=3)" << endl;
 }
 
 int main() { testTree(); }
