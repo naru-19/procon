@@ -33,6 +33,11 @@ struct graph {
     edge e;
     e.to = t, e.cost = cost;
     G[s].push_back(e);
+    if (!directed) {
+      edge e;
+      e.to = s, e.cost = cost;
+      G[t].push_back(e);
+    }
   }
 
   void dij(ll s) {
