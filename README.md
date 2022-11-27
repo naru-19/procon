@@ -5,6 +5,7 @@
 # データ構造
 
 - [1.Tree](#1.Tree)
+- [2.Dijkstra](#2.Dijkstra) (データ構造ではないが...)
 
 ## 1.Tree
 
@@ -33,6 +34,40 @@
   cout << tree.dist(2, 4) << ": ans=3" << endl;
   ll diameter = tree.get_diameter().first;
   cout << "tree diameter is " << diameter << "(ans=3)" << endl;
+```
+
+## 2.Dijkstra
+
+無向グラフ、有向グラフどちらにも対応している。↓ サンプル
+
+```c++
+void testPath() {
+  /*無向グラフ*/
+  ll n = 5;
+  graph g(n);
+  g.add_edge(0, 1, 2);
+  g.add_edge(1, 3, 1);
+  g.add_edge(0, 3, 4);
+  g.add_edge(2, 4, 1);
+  g.add_edge(0, 2, 1);
+  g.add_edge(2, 3, 1);
+  g.dij(0);
+  cout << "0->3までの最短距離=" << g.d[3] << endl;
+  cout << "経路3<-";
+  ll tmp = 3;
+  while (g.prev[tmp] != 0) {
+    cout << g.prev[tmp] << "<-";
+    tmp = g.prev[tmp];
+  }
+  cout << "0" << endl;
+}
+```
+
+_output_
+
+```
+0->3までの最短距離=2
+経路3<-2<-0
 ```
 
 # Others
