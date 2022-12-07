@@ -6,6 +6,7 @@
 
 - [1.Tree](#1.Tree)
 - [2.Dijkstra](#2.Dijkstra) (データ構造ではないが...)
+- [3.SCC](#3.SCC)
 
 ## 1.Tree
 
@@ -69,6 +70,55 @@ _output_
 0->3までの最短距離=2
 経路3<-2<-0
 ```
+
+## 3.SCC
+
+有向グラフを強連結成分分解する。また、その後にできた dag を取得可能。<br>
+↓ サンプルコード
+
+```cpp
+int main(){
+  ll n, m;
+  cin >> n >> m;
+  vector<vector<ll> > g(n);
+  vector<vector<ll> > rev(n);
+  rep(i, m) {
+    ll a, b;
+    cin >> a >> b;
+    a--, b--;
+    g[a].push_back(b);
+    rev[b].push_back(a);
+  }
+  SccSolver solver = SccSolver(n, g, rev);
+  solver.solve();
+  solver.build();
+  for (ll i = 0; i < solver.group.size(); i++) {
+    printf("group%lldの構成要素", i);
+    for (auto node : solver.group[i]) {
+      cout << node + 1 << " ";
+    }
+    cout << "" << endl;
+  }
+  cout << "-----DAG-----" << endl;
+  for (ll i = 0; i < solver.group.size(); i++) {
+    for (auto next : solver.dag[i]) {
+      cout << i << "->" << next << endl;
+    }
+  }
+}
+```
+
+入力`8 10 1 2 2 3 3 1 3 4 4 5 5 6 6 4 7 8 8 7 8 7`に対して出力は
+
+```
+group0の構成要素7 8
+group1の構成要素1 3 2
+group2の構成要素4 6 5
+-----DAG-----
+1->2
+```
+
+[例題](https://atcoder.jp/contests/typical90/tasks/typical90_u)
 
 # Others
 
