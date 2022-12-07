@@ -80,7 +80,7 @@ struct SccSolver {
   }
 };
 
-void tenkei21() {
+void test() {
   ll n, m;
   cin >> n >> m;
   vector<vector<ll> > g(n);
@@ -94,21 +94,23 @@ void tenkei21() {
   }
   SccSolver solver = SccSolver(n, g, rev);
   solver.solve();
-  ll ans = 0;
-  for (auto scc : solver.group) {
-    ll size = scc.size();
-    ans += (size - 1) * size / 2;
-  }
-  cout << ans << endl;
-  cout << "-----↓おまけ-----" << endl;
   solver.build();
+  cout << "scc done" << endl;
+  for (ll i = 0; i < solver.group.size(); i++) {
+    printf("group%lldの構成要素", i);
+    for (auto node : solver.group[i]) {
+      cout << node + 1 << " ";
+    }
+    cout << "" << endl;
+  }
+  cout << "-----DAG-----" << endl;
   for (ll i = 0; i < solver.group.size(); i++) {
     for (auto next : solver.dag[i]) {
-      cout << i << " " << next << endl;
+      cout << i << "->" << next << endl;
     }
   }
   //入力:8 10 1 2 2 3 3 1 3 4 4 5 5 6 6 4 7 8 8 7 8 7
   //出力が[1 2]であればok,(0は今日連結成分分解をすると頂点だけ(7,8)になる)
 }
 
-int main() { tenkei21(); }
+int main() { test(); }
