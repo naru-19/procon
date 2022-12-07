@@ -1,146 +1,137 @@
 #include <bits/stdc++.h>
-#include <atcoder/all>
 using namespace std;
-#define rep(i, n) for (ll i = 0; i < n; ++i)
-#define rep2(i,j,n) for(ll i=j;i<n;++i)
+#define rep(i, n) for (int i = 0; i < n; ++i)
+#define rep2(i, x, n) for (int i = x; i < n; ++i)
 #define Sort(a) sort(a.begin(), a.end())
-#define Sortr(a) sort(a.rbegin(), a.rend())
 using ll = long long;
-#define tobit(x, i) (((x) >> (i)) & 1)
-#define INF 1001001001001001000
-#define yes "Yes"
-#define no "No"
-template <class T>
-inline bool chmin(T &a, T b){
-    if (a > b){
-        a = b;return true;
-    }
-    return false;
-}
-template <class T>
-inline bool chmax(T &a, T b){
-    if (a < b){
-        a = b;return true;
-    }
-    return false;
-}
 
-struct edge{ll to, cost;};
-typedef pair<ll,ll> P;
-struct graph{
-    ll V;
-    vector<vector<edge>> G;
-    vector<ll> d;
-    graph(ll n){
-        init(n);
-    }   
-    void init(ll n){
-        V = n;
-        G.resize(V);
-        d.resize(V);
-        rep(i,V){
-            d[i] = INF;
-        }
-    }
-  void add_edge(ll s, ll t, ll cost){
-    edge e;
-    e.to = t, e.cost = cost;
-    G[s].push_back(e);
+#define DEBUG_ON
+
+struct SccSolver {
+  ll n;
+  vector<vector<ll> > g, rev;
+  vector<ll> _seen1, _seen2;
+  vector<ll> nodeId;  //  帰りがけの順番 -> 頂点番号
+  vector<vector<ll> > group;
+  vector<set<ll> > dag;
+  SccSolver(ll _n, vector<vector<ll> >& _g, vector<vector<ll> >& _rev) {
+    n = _n;
+    g = _g;
+    rev = _rev;
+    _seen1.resize(n);
+    _seen2.resize(n);
+    nodeId.resize(n);
   }
-
-  void dij(ll s){
-    rep(i,V){
-      d[i] = INF;
+  // 帰りがけ順dfs
+  void _postdfs(ll& id, ll tmp) {
+    _seen1[tmp] = 1;
+    for (auto next : g[tmp]) {
+      if (_seen1[next]) continue;
+      _postdfs(id, next);
     }
-    d[s] = 0;
-    priority_queue<P,vector<P>, greater<P> > que;
-    que.push(P(0,s));
-    while(!que.empty()){
-      P p = que.top(); que.pop();
-      ll v = p.second;
-      if(d[v]<p.first) continue;
-      for(auto e : G[v]){
-        if(d[e.to]>d[v]+e.cost){
-          d[e.to] = d[v]+e.cost;
-          que.push(P(d[e.to],e.to));
+    nodeId[id] = tmp;
+    id++;
+  }
+  void _dfs(vector<ll>& scc, ll tmp) {
+    _seen2[tmp] = 1;
+    scc.push_back(tmp);
+    for (auto next : rev[tmp]) {
+      if (_seen2[next]) continue;
+      _dfs(scc, next);
+    }
+  }
+  void solve() {
+    // 1回目のdfs
+    ll id = 0;
+    for (ll i = 0; i < n; i++) {
+      if (_seen1[i]) continue;
+      _postdfs(id, i);
+    }
+    // 2回目のdfs
+    for (ll i = n - 1; i >= 0; i--) {
+      ll node = nodeId[i];
+      if (_seen2[node]) continue;
+      vector<ll> scc;
+      _dfs(scc, node);
+      group.push_back(scc);
+    }
+  }
+  // groupからdagを形成, dagはsetであることに注意
+  void build() {
+    if (group.size() == 0) {
+      cout << "please run SccSolver.solve() before build." << endl;
+      return;
+    }
+    dag.resize(group.size());
+    vector<ll> mapping(n);  // 頂点番号 -> group番号
+    for (ll i = 0; i < group.size(); i++) {
+      for (auto node : group[i]) {
+        mapping[node] = i;
+      }
+    }
+    for (ll i = 0; i < n; i++) {
+      for (auto next : g[i]) {
+        if (mapping[i] != mapping[next]) {
+          dag[mapping[i]].insert(mapping[next]);
         }
       }
     }
+    mapping.clear();
   }
 };
-void keta(double x){cout<<fixed<<setprecision(10)<<x;}
-string num2str(ll x){
-    string s;ostringstream oss;oss <<x<<flush;s = oss.str();
-    return s;
-}
-#define DEBUG_ON
 
-
-
-
-ll modinv(ll a, ll MOD) {
-    ll m= MOD;
-    ll b = m, u = 1, v = 0;
-    while (b) {
-        ll t = a / b;
-        a -= t * b; swap(a, b);
-        u -= t * v; swap(u, v);
-    }
-    u %= m; 
-    if (u < 0) u += m;
-    return u;
-}
-class UnionFind {
-private:
-//   int* data;
-    vector<ll>data;
-
-public:
-  UnionFind(int n = 0) : data(n, -1) {}
-
-  int find(int x) {
-    return data[x] < 0 ? x : data[x] = find(data[x]);
+void tenkei21() {
+  ll n, m;
+  cin >> n >> m;
+  vector<vector<ll> > g(n);
+  vector<vector<ll> > rev(n);
+  rep(i, m) {
+    ll a, b;
+    cin >> a >> b;
+    a--, b--;
+    g[a].push_back(b);
+    rev[b].push_back(a);
   }
-
-  bool unite(int x, int y) {
-    x = find(x); y = find(y);
-
-    if (x == y) return false;
-    else {
-      if(data[x] > data[y]) swap(x, y);
-      data[x] += data[y];
-      data[y] = x;
-      return true;
+  SccSolver solver = SccSolver(n, g, rev);
+  solver.solve();
+  ll ans = 0;
+  for (auto scc : solver.group) {
+    ll size = scc.size();
+    ans += (size - 1) * size / 2;
+  }
+  solver.build();
+  for (ll i = 0; i < solver.dag.size(); i++) {
+    for (auto next : solver.dag[i]) {
+      cout << i << " " << next << endl;
     }
   }
-
-  bool is_same(int x, int y) {
-    return find(x) == find(y);
-  }
-
-  int size(int x) {
-    return -data[find(x)];
-  }
-};
-ll MOD = 1000000007;
-// ll MOD=998244353;
-long long pow2(long long x, long long n) {long long ret = 1;    while (n > 0) {        if (n & 1) ret = ret * x % MOD;  // n の最下位bitが 1 ならば x^(2^i) をかける
-        x = x * x % MOD;
-        n >>= 1;  // n を1bit 左にずらす
-    }
-    return ret;
 }
 
-ll ncr(ll n,ll r){ll ans=1;
-    rep(i,r){ans=ans*(n-i);ans*=pow2(i+1,MOD-2);ans%=MOD;}
-    return ans;
-}
-// ll h, w;
-// ll n;
-// ll n;
-// cin>>n;
-// string s(n,'');
-int main()
-{
+int main() {
+  ll n, m;
+  cin >> n >> m;
+  vector<vector<ll> > g(n);
+  vector<vector<ll> > rev(n);
+  rep(i, m) {
+    ll a, b;
+    cin >> a >> b;
+    a--, b--;
+    g[a].push_back(b);
+    rev[b].push_back(a);
+  }
+  SccSolver solver = SccSolver(n, g, rev);
+  solver.solve();
+  ll ans = 0;
+  for (auto scc : solver.group) {
+    ll size = scc.size();
+    ans += (size - 1) * size / 2;
+  }
+  // solver.build();
+  // for (ll i = 0; i < solver.dag.size(); i++) {
+  //   for (auto next : solver.dag[i]) {
+  //     // cout << i << " " << next << endl;
+  //   }
+  // }
 
+  cout << ans << endl;
 }
