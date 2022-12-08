@@ -147,6 +147,8 @@ ll ncr(ll n, ll r) {
 // ll n;
 // cin>>n;
 // string s(n,'');
+// 第一〜第四象限の隅にあるやつとだけ比較すれば十分
+
 int main() {
   ll n, q;
   cin >> n >> q;
