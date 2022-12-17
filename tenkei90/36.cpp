@@ -149,9 +149,7 @@ ll ncr(ll n, ll r) {
 // string s(n,'');
 // 第一〜第四象限の隅にあるやつとだけ比較すれば十分
 
-int main() {
-  ll n, q;
-  cin >> n >> q;
+void solve1(ll n, ll q) {
   vector<ll> px(n), py(n);
 
   vector<ll> corners(4);
@@ -194,4 +192,35 @@ int main() {
     }
     cout << ans << endl;
   }
+}
+
+void solve2(ll n, ll q) {
+  vector<vector<ll>> px(n, vector<ll>(2));
+  rep(i, n) { cin >> px[i][0] >> px[i][1]; }
+  vector<vector<ll>> px_rotated(n, vector<ll>(2));
+  ll xmin = INF, xmax = -INF, ymin = INF, ymax = -INF;
+  rep(i, n) {
+    px_rotated[i][0] = (px[i][0] - px[i][1]);
+    px_rotated[i][1] = (px[i][0] + px[i][1]);
+    xmin = min(xmin, px_rotated[i][0]);
+    xmax = max(xmax, px_rotated[i][0]);
+    ymin = min(ymin, px_rotated[i][1]);
+    ymax = max(ymax, px_rotated[i][1]);
+  }
+  rep(i, q) {
+    ll j;
+    cin >> j;
+    j--;
+    ll ans = max({abs(px_rotated[j][0] - xmin), abs(px_rotated[j][0] - xmax),
+                  abs(px_rotated[j][1] - ymin), abs(px_rotated[j][1] - ymax)
+
+    });
+    cout << ans << endl;
+  }
+}
+
+int main() {
+  ll n, q;
+  cin >> n >> q;
+  solve2(n, q);
 }
